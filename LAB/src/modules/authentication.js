@@ -5,7 +5,7 @@ function isSecret(secret) {
 }
 
 function isAuth(secret) {
-  const validPassphrase = process.env.PASSPHRASE || 'secretphrase';
+  const validPassphrase = process.env.PASSPHRASE || 'mysecretphrase';
   const passphrase = secret.split(PREFIX)[1];
 
   return passphrase === validPassphrase;
