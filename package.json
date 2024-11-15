@@ -1,20 +1,31 @@
 {
-  "name": "courses-ci",
+  "name": "your-project-name",
   "version": "1.0.0",
-  "description": "Je vais noter votre investissement durant nos séances et vous envoyer des retours pour améliorer votre rendu.   Chacun doit avoir une PR sous la forme \"Prénom Nom\" sur une branche prénom.nom avec l'ensemble de votre travail à l'intérieur.   En premier lieu, faites un Fork de ce repository grâce au bouton Fork en haut à droite.   Ensuite, clonez le fork de ce repository et créez votre branche avec tous vos fichiers.   /!\\ WARN - Ne pushez pas vos node_modules/ car ils contiennent énormément de fichiers et qui ne sont pas à mettre en ligne.   Quand vous avez push votre branch sur votre repository, un bouton devrait s'afficher pour vous proposer de réaliser une PR sur mon repository.",
-  "main": "index.js",
   "scripts": {
-    "test": "jest",
-    "lint": "eslint ."
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "test": "jest", 
+    "build": "webpack --config webpack.config.js",
+    "release": "release-it"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "eslint": "^9.14.0",
-    "express": "^4.21.1"
+    "axios": "^0.27.2",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "webpack": "^5.64.0"
   },
   "devDependencies": {
-    "jest": "^29.7.0"
+    "eslint": "^8.0.0",
+    "jest": "^27.4.5",
+    "release-it": "^14.4.0",
+    "webpack-cli": "^4.9.1",
+    "eslint-plugin-react": "^7.30.1",
+    "eslint-plugin-import": "^2.25.3",
+    "eslint-config-airbnb": "^18.2.1"
+  },
+  "engines": {
+    "node": ">= 18.0.0"
+  },
+  "eslintConfig": {
+    "extends": ["airbnb", "plugin:react/recommended", "plugin:import/errors", "plugin:import/warnings"]
   }
 }

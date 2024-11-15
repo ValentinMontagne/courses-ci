@@ -1,20 +1,32 @@
-import globals from "globals";
-import pluginJs from "@eslint/js";
+import { defineConfig } from 'eslint-define-config';
 
-export default [
-  {
-    ignores: ["node_modules/**", "**/*.test.js"],
-    files: ["**/*.js"],
-    languageOptions: { sourceType: "commonjs" },
+export default defineConfig({
+  env: {
+    browser: true,
+    es2021: true
   },
-  { languageOptions: { globals: globals.node } },
-  pluginJs.configs.recommended,
-  {
-    rules: {
-      "no-unused-vars": "error",
-      "no-undef": "error",
-      "no-console": "warn", // Avertissement pour console.log
-      "constructor-super": "off", // Désactive cette règle si elle pose problème
-    },
+  extends: [
+    'eslint:recommended',
+    'plugin:react/recommended',
+    'plugin:import/errors',
+    'plugin:import/warnings',
+    'airbnb'
+  ],
+  parserOptions: {
+    ecmaVersion: 'latest',
+    sourceType: 'module'
   },
-];
+  plugins: ['react', 'import'],
+  rules: {
+    // Règles de configuration personnalisées
+    'react/jsx-filename-extension': ['warn', { extensions: ['.jsx', '.tsx'] }],
+    'import/prefer-default-export': 'off',
+    'no-console': 'warn',
+    'no-unused-vars': 'warn'
+  },
+  settings: {
+    react: {
+      version: 'detect'
+    }
+  }
+});
