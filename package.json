@@ -1,0 +1,31 @@
+{
+  "name": "your-project-name",
+  "version": "1.0.0",
+  "scripts": {
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "test": "jest", 
+    "build": "webpack --config webpack.config.js",
+    "release": "release-it"
+  },
+  "dependencies": {
+    "axios": "^0.27.2",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "webpack": "^5.64.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.0.0",
+    "jest": "^27.4.5",
+    "release-it": "^14.4.0",
+    "webpack-cli": "^4.9.1",
+    "eslint-plugin-react": "^7.30.1",
+    "eslint-plugin-import": "^2.25.3",
+    "eslint-config-airbnb": "^18.2.1"
+  },
+  "engines": {
+    "node": ">= 18.0.0"
+  },
+  "eslintConfig": {
+    "extends": ["airbnb", "plugin:react/recommended", "plugin:import/errors", "plugin:import/warnings"]
+  }
+}
