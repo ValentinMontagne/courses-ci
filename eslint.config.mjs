@@ -7,7 +7,7 @@ export default [
     files: ["**/*.js"],
     languageOptions: { sourceType: "commonjs" },
   },
-  { languageOptions: { globals: { ...globals.node, ...globals.jest } } },  // Ajout de globals.jest
+  { languageOptions: { globals: { ...globals.node, jest: true } } },  // Ajout direct de globals.jest
   pluginJs.configs.recommended,
   {
     rules: {
