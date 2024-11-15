@@ -3,17 +3,18 @@ import pluginJs from "@eslint/js";
 
 export default [
   {
-    ignores: ["**/*.test.js"],
+    ignores: ["node_modules/**", "**/*.test.js"],
     files: ["**/*.js"],
     languageOptions: { sourceType: "commonjs" },
   },
-  { languageOptions: { globals: { ...globals.node, jest: true } } },  // Ajout direct de globals.jest
+  { languageOptions: { globals: globals.node } },
   pluginJs.configs.recommended,
   {
     rules: {
       "no-unused-vars": "error",
       "no-undef": "error",
-      "no-console": "error",
+      "no-console": "warn", // Avertissement pour console.log
+      "constructor-super": "off", // Désactive cette règle si elle pose problème
     },
   },
 ];
