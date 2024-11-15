@@ -9,15 +9,6 @@ on:
       - main
 
 jobs:
-  # Cache configuration
-  cache:
-    key:
-      files:
-        - package-lock.json
-    paths:
-      - node_modules/
-      - .npm/
-
   # Job pour installer les dépendances
   install-dependencies:
     runs-on: ubuntu-latest
