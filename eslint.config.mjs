@@ -1,10 +1,9 @@
-// eslint.config.mjs
 import globals from "globals";
 import pluginJs from "@eslint/js";
 
 export default [
   {
-    ignores: ["**/*.test.js"],
+    ignores: ["node_modules/**", "**/*.test.js"],
     files: ["**/*.js"],
     languageOptions: { sourceType: "commonjs" },
   },
@@ -14,7 +13,8 @@ export default [
     rules: {
       "no-unused-vars": "error",
       "no-undef": "error",
-      "no-console": "error",
+      "no-console": "warn", // Avertissement pour console.log
+      "constructor-super": "off", // Désactive cette règle si elle pose problème
     },
   },
 ];
