@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
-    "lint": "eslint ."
+    "lint": "eslint src/index.js --max-warnings=0"
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",
