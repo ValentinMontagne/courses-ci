@@ -1,0 +1,91 @@
+# .gitlab-ci.yml file
+
+image: node:latest
+cache:
+  key:
+    files:
+      - package-lock.json
+  paths:
+    - node_modules/
+    - .npm/
+    
+# Define all the stages used for the pipeline
+stages:
+  - validate
+  - test
+  - build
+  - release
+  - deploy
+  
+# Add first job using the '.pre' stage defined by Gitlab, could be a defined stage too
+# .pre is always run as the first stage
+install:
+  stage: .pre
+  script:
+    # define cache dir & use it npm!
+    - npm ci --cache .npm --prefer-offline
+
+
+.conditions:
+   rules:
+      - if: '$CI_COMMIT_TAG == null && $CI_COMMIT_TITLE !~ /^chore: release/'
+
+.tests:
+   extends: .conditions
+   stage: test
+
+
+lint:
+  stage: validate
+  script:
+    - npm run lint 
+  rules:
+      - if: '$CI_COMMIT_TAG == null && $CI_COMMIT_TITLE !~ /^chore: release/'
+  
+  
+
+  
+
+unit-test:
+  script:
+    - npm test
+  extends: .tests
+
+only-canary:
+  stage: validate
+  script : 
+    - echo "Hello Only '$JOB_VAR'"
+  extends : .conditions
+
+integration-test:
+  script : 
+    - echo "Hello integration"
+  needs: [unit-test]
+  extends: .tests
+
+e2e-test:
+  script : 
+  - echo "Hello E2E !"
+  needs : [integration-test]
+  extends: .tests
+  
+release:
+  stage: release
+  # Permet de spécifier que ce Job sera activé manuellement
+  when: manual
+  # Permet d'ajouter des rules au Job pour l'afficher ou non grance au if
+  # Ici le commit doit être sur la branche main, cela ne dois pas être un tag
+  # et le title du commit doit être différent de ce format
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"
+        && $CI_COMMIT_TAG == null
+        && $CI_COMMIT_TITLE !~ /^chore: release/'
+  before_script:
+    - git config user.email $GITLAB_USER_EMAIL
+    - git config user.name $GITLAB_USER_NAME
+    - git remote set-url origin
+      "https://gitlab-ci-token:$GITLAB_TOKEN@$CI_SERVER_HOST/$CI_PROJECT_PATH.git"
+    - git checkout $CI_COMMIT_BRANCH
+    - git pull origin $CI_COMMIT_BRANCH --rebase
+  script:
+    - npx --yes release-it --ci
