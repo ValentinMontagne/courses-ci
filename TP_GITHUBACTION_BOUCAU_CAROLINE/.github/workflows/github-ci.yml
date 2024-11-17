@@ -1,0 +1,82 @@
+name: Node.js CI
+on:
+  push:
+    branches: ['main']
+  pull_request:
+    branches: ['main']
+  workflow_dispatch:
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+        matrix:
+            node-version: [20.x]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build --if-present
+      - run: npm test
+
+  unit-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'npm'
+      - name: Install dependance
+        run: npm ci --cache .npm --prefer-offline
+      - name: Run unit tests
+        run: npm test
+  e2e-test:
+    runs-on : ubuntu-latest
+    needs: integration-test
+    steps:
+        - name: e2e-test
+          run: echo "Hello E2E !"
+  only-canary:
+    env:
+      CANARY : "Hello Only Canary !"
+    runs-on : ubuntu-latest
+    steps:
+        - name : only-canary
+          run : echo "$CANARY"
+  integration-test:
+    runs-on : ubuntu-latest
+    needs: unit-test
+    steps:
+        - name: integration test
+          run: echo "HELLO Integration !" 
+  
+
+  release:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions: 
+        contents : write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: crée une release
+        run: |
+          git config user.email "${{ secrets.USER_MAIL }}"
+          git config user.name "${{ secrets.USER_NAME }}"
+          git remote set-url origin "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          git checkout ${{ github.ref_name }}
+          git pull origin ${{ github.ref_name }} --rebase
+      - name: Run release-it
+        run: npx --yes release-it --ci
+
+      
