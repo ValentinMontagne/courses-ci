@@ -12,7 +12,8 @@
   },
   "scripts": {
     "test": "echo \"No tests specified\"",
-    "lint": "eslint "
+    "lint": "eslint ",
+    "build": "vite build"
   },
   "keywords": [],
   "author": "",
