@@ -1,0 +1,84 @@
+# .gitlab-ci.yml file
+
+image: node:latest
+cache:
+  key:
+    files:
+      - package-lock.json
+  paths:
+    - node_modules/
+    - .npm/
+
+stages:
+  - validate
+  - test
+  - build
+  - release
+  - deploy
+.common_script: &common_script
+  script:
+    - echo "Hello from common script!"
+
+.common_rules: &common_rules
+    rules:
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_COMMIT_TAG == null && $CI_COMMIT_TITLE !~ /^chore: release/'
+
+  
+install:	
+  stage: .pre
+  script:
+    # define cache dir & use it npm!
+    - npm ci --cache .npm --prefer-offline
+
+lint:
+  stage: validate
+  <<: *common_rules
+  script:
+    - npm run lint
+
+unit-test:
+  stage: test
+  <<: *common_rules
+  script:
+    - npm test
+
+release:
+  stage: release
+  when: manual
+  <<: *common_rules
+  before_script:
+    - git config user.email $GITLAB_USER_EMAIL
+    - git config user.name $GITLAB_USER_NAME
+    - git remote set-url origin "https://gitlab-ci-token:$GITLAB_TOKEN@$CI_SERVER_HOST/$CI_PROJECT_PATH.git"
+    - git checkout $CI_COMMIT_BRANCH
+    - git pull origin $CI_COMMIT_BRANCH --rebase
+  script:
+    - npx --yes release-it --ci  
+
+integration-test:
+  stage: test
+  <<: *common_rules
+  script:
+    - echo "Hello Integration !"
+  needs:
+    - job: unit-test
+      artifacts: false
+
+e2e-test:
+  stage: test
+  <<: *common_rules
+  script:
+    - echo "Hello E2E !"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  needs:
+    - job: integration-test
+      artifacts: false 
+      
+only-canary:
+  stage: test
+  script:
+    - echo "Hello Only Canary !"
+  rules:
+    - if: '$ENV_TARGET == "canary"'
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_COMMIT_TAG == null && $CI_COMMIT_TITLE !~ /^chore: release/'
