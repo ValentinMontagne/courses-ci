@@ -87,7 +87,7 @@ jobs:
         run: npm ci
   e2e-test:
     runs-on: ubuntu-latest
-    needs: integration-test
+    needs: build
     if: github.event_name == 'pull_request' 
     steps:
       - name: Run E2E Tests
