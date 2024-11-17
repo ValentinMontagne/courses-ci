@@ -11,7 +11,7 @@
     "globals": "^15.12.0"
   },
   "scripts": {
-    "test": "jest",
+    "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint "
   },
   "keywords": [],
