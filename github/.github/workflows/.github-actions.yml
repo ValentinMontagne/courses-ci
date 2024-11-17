@@ -1,0 +1,50 @@
+name: Node.js CI
+on:
+  push:
+    branches: ['main']
+  pull_request:
+    branches: ['main']
+  workflow_dispatch:
+
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: checks things
+
+        if: github.ref_name == 'main' && github.ref_type != 'tag' && github.event.head_commit.message != 'release'
+      
+        run: 
+          git config user.email $GITLAB_USER_EMAIL
+          git config user.name $GITLAB_USER_NAME
+          git remote set-url origin "https://gitlab-ci-token:$GITLAB_TOKEN@$CI_SERVER_HOST/$CI_PROJECT_PATH.git"
+          git checkout $CI_COMMIT_BRANCH
+          git pull origin $CI_COMMIT_BRANCH --rebase
+          npx --yes release-it --ci
+
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version:
+          - 18
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      - name: Install
+        run: npm ci --cache .npm --prefer-offline
+      - name: Validate
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
+
+
