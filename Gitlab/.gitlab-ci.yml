@@ -1,0 +1,62 @@
+image: node:latest
+cache:
+  key:
+    files:
+      - package-lock.json
+  paths:
+    - node_modules/
+    - .npm/
+
+stages:
+  - validate
+  - test
+  - build
+  - release
+  - deploy
+
+# Définition d'un modèle commun avec un Anchor
+.default-test-job: &default-test-job
+  stage: test
+  script:
+    - echo "Running tests"
+  rules:
+    - if: '$CI_COMMIT_TAG == null && $CI_COMMIT_TITLE !~ /^chore: release/'
+
+# Job spécifique avec le script personnalisé mais basé sur l'Anchor
+unit-test:
+  <<: *default-test-job
+  script:
+    - npm test
+
+integration-test:
+  <<: *default-test-job
+  script:
+    - echo "Hello Integration !"
+  needs:
+    - unit-test
+
+e2e-test:
+  <<: *default-test-job
+  script:
+    - echo "Hello E2E!"
+  needs:
+    - integration-test
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+
+release:
+  stage: release
+  when: manual
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"
+        && $CI_COMMIT_TAG == null
+        && $CI_COMMIT_TITLE !~ /^chore: release/'
+  before_script:
+    - git config user.email $GITLAB_USER_EMAIL
+    - git config user.name $GITLAB_USER_NAME
+    - git remote set-url origin
+      "https://gitlab-ci-token:$GITLAB_TOKEN@$CI_SERVER_HOST/$CI_PROJECT_PATH.git"
+    - git checkout $CI_COMMIT_BRANCH
+    - git pull origin $CI_COMMIT_BRANCH --rebase
+  script:
+    - npx --yes release-it --ci
