@@ -1,0 +1,116 @@
+# .gitlab-ci.yml file
+image: node:latest
+cache:
+    key:
+        files:
+            - package-lock.json
+    paths:
+        - node_modules/
+        - .npm/
+
+stages:
+    #.pre ne fonctionne pas..
+    - pre-install
+    - validate # Updated to include unit-test, so integration-test can depend on it
+    - test
+    - build
+    - release
+    - deploy
+
+# START EXERCICE 5
+.chore_commit:
+    rules:
+        - if: "$CI_COMMIT_TAG == null && $CI_COMMIT_TITLE !~ /^chore: release/"
+
+.canary:
+    rules:
+        - if: '$ENV_TARGET == "canary"'
+# END EXERCICE 5
+
+install:
+    stage: pre-install
+    script:
+        - npm ci --cache .npm --prefer-offline
+
+unit-test:
+    stage: validate # Ce job est dans le stage validate
+    extends: .chore_commit
+    script:
+        - npm test
+
+lint:
+    stage: validate # Ce job est dans le stage validate
+    extends: .chore_commit
+    script:
+        - npm run lint
+
+# START EXERCICE 4
+integration-test:
+    stage: test
+    needs:
+        - unit-test
+    extends: .chore_commit
+    rules:
+        - if: '$ENV_TARGET == "canary"'
+    script:
+        - echo "Hello Integration!"
+# END EXERCICE 4
+
+#START EXERCICE 2
+e2e-test:
+    stage: test
+    needs:
+        - integration-test
+    rules:
+        - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    script:
+        - echo "Hello E2E!"
+
+#END EXERCICE 2
+
+# START EXERCICE 3
+only-canary:
+    stage: validate
+    extends: .chore_commit
+    rules:
+        - if: '$ENV_TARGET == "canary"'
+    script:
+        - echo "Hello Only Canary!"
+# END EXERCICE 3
+
+release:
+    stage: release
+    when: manual
+    extends: .chore_commit
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "main"'
+    before_script:
+        - git config user.email $GITLAB_USER_EMAIL
+        - git config user.name $GITLAB_USER_NAME
+        - git remote set-url origin "https://gitlab-ci-token:$GITLAB_TOKEN@$CI_SERVER_HOST/$CI_PROJECT_PATH.git"
+        - git checkout $CI_COMMIT_BRANCH
+        - git pull origin $CI_COMMIT_BRANCH --rebase
+    script:
+        - npx --yes release-it --ci
+
+build:
+    stage: build
+    extends: .chore_commit
+    script:
+        - mkdir -p dist
+
+        - cp package.json dist/
+        - cp package-lock.json dist/
+
+        - cp -r src/ dist/src/
+
+        - cd dist && npm ci --production
+
+        - echo "Build créé le $(date)" > build-info.txt
+
+        - cd ..
+
+    artifacts:
+        paths:
+            - dist/
+        expire_in: 1 week

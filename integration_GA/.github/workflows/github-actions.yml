@@ -1,0 +1,110 @@
+name: GitHub Actions Demo
+on: [push]
+
+jobs:
+    install:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "latest"
+
+            - name: Cache Node modules
+              uses: actions/cache@v4
+              id: cache-node-modules
+              with:
+                  path: node_modules
+                  key: ${{ runner.os }}-node_modules-${{ hashFiles('package-lock.json') }}
+                  restore-keys: |
+                      ${{ runner.os }}-node_modules-
+
+            - name: Install dependencies
+              run: npm ci --prefer-offline
+
+    validate:
+        needs: install
+        runs-on: ubuntu-latest
+        if: "!startsWith(github.event.head_commit.message, 'chore: release')"
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "latest"
+
+            - name: Cache node modules
+              uses: actions/cache@v4
+
+              with:
+                  path: node_modules
+                  key: ${{ runner.os }}-node_modules-${{ hashFiles('package-lock.json') }}
+                  restore-keys: |
+                      ${{ runner.os }}-node_modules-
+
+            - name: unit-test
+              run: npm test
+
+            - name: eslint setup
+              run: npm run lint
+
+    e2e-test:
+        needs: validate
+        runs-on: ubuntu-latest
+        if: github.event_name == 'pull_request'
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "latest"
+
+            - name: Cache node modules
+              uses: actions/cache@v4
+              with:
+                  path: node_modules
+                  key: ${{ runner.os }}-node_modules-${{ hashFiles('package-lock.json') }}
+                  restore-keys: |
+                      ${{ runner.os }}-node_modules-
+
+            - name: Run E2D tests
+              run: echo "Hello E2E!"
+
+    release:
+        needs: validate
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "latest"
+
+            - name: Cache node modules
+              uses: actions/cache@v4
+              with:
+                  path: node_modules
+                  key: ${{ runner.os }}-node_modules-${{ hashFiles('package-lock.json') }}
+                  restore-keys: |
+                      ${{ runner.os }}-node_modules-
+
+            - name: Configure Git
+              run: |
+                  git config user.name "${GITHUB_ACTOR}"
+                  git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+
+            - name: Release
+              env:
+                  GITHUB_TOKEN: ${{ secrets.ENV_TOKEN }}
+              run: npx --yes release-it --ci --github.token=$GITHUB_TOKEN
