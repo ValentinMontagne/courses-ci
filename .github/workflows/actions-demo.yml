@@ -67,7 +67,7 @@ jobs:
     needs: build 
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     env:
-      GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.HUB_TOKEN }}
     steps:
       - uses: actions/checkout@v3
 
