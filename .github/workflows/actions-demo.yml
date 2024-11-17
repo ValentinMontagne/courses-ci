@@ -5,8 +5,7 @@ on:
     branches: ['main']
   pull_request:
     branches: ['main']
-  env: 
-    ENV_TARGET: canary
+  
   
 jobs:
   # Job de build
@@ -90,6 +89,8 @@ jobs:
   only-canary:
     runs-on: ubuntu-latest
     needs: build
+    env: 
+     ENV_TARGET: canary
     if: evn.ENV_TARGET == 'canary'
     steps:
       - name: Run Only Canary Command
