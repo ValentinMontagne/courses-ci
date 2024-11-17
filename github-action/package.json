@@ -1,0 +1,26 @@
+{
+  "name": "mon-auth-api",
+  "version": "1.0.0",
+  "description": "API d'authentification",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo 'No tests specified'",
+    "start": "node index.js",
+    "lint": "eslint . --max-warnings=0",
+    "build": "mkdir -p dist && echo 'Build successful' > dist/index.html && echo 'Build completed successfully.'"
+  },
+  "author": "Abir Es-saiydy",
+  "license": "ISC",
+  "dependencies": {
+    "eslint": "^8.57.1",
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.15.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-vue": "^9.31.0",
+    "globals": "^15.12.0"
+  }
+}
