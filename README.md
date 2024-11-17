@@ -1,3 +1,10 @@
+## AKLI HOCINE
+J'ai pas reussi a finir le github action suite a des erreur daans linstalation de eslint meme si sur mon depot local est bien installer ma pipeline arrive pas a le retrouver chose qui m a fait penser a changer de verion de node de eslint mais j ai toujours la meme erreur, j ai reussi a resoudre cette erreur que j avais egalement pour tests en ajoutant npx dans la commande jason 
+
+
+
+
+
 # Rendu
 
 Je vais noter votre investissement durant nos séances et vous envoyer des retours pour améliorer votre rendu.  
