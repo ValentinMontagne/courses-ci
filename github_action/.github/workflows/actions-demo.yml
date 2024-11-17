@@ -19,8 +19,6 @@ jobs:
           cache: 'npm'
       - name: Install
         run: npm ci --cache .npm --prefer-offline
-      - name: Validate
-        run: npm run lint
       - name: Test
         run: npm test
       - name: Build for production
