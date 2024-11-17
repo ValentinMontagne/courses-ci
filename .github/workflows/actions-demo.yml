@@ -33,7 +33,7 @@ jobs:
         run: npm run build
 
       # Télécharger l'artefact (dist)
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: web
           path: ./dist
