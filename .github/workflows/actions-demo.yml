@@ -56,33 +56,4 @@ jobs:
 
       - name: Run Tests
         run: npm test
-  release:
-    runs-on: ubuntu-latest
-    needs: build  
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'  
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Set up Git user
-        run: |
-          git config user.email "${{ secrets.GIT_EMAIL }}"
-          git config user.name "${{ secrets.GIT_USERNAME }}"
-          git remote set-url origin "https://github.com/${{ github.repository }}.git"
-      
-      - name: Set up Node.js for release
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16'
-      
-      - name: Install release-it
-        run: npm install --save-dev release-it
-
-      - name: Create release
-        run: |
-          npx --yes release-it --ci
-
-      - name: Push changes
-        run: git push --follow-tags
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
 
