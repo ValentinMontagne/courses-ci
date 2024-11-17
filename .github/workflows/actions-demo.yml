@@ -5,8 +5,13 @@ on:
     branches: ['main']
   pull_request:
     branches: ['main']
-env: 
-  ENV_TARGET: canary
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Set the target environment'
+        default: 'production'
+        required: yes
+  
   
 jobs:
   # Job de build
@@ -89,7 +94,7 @@ jobs:
         run: echo "Hello E2E!"
   only-canary:
     runs-on: ubuntu-latest 
-    if: ${{ env.ENV_TARGET == 'canary' }}
+    if: ${{ github.event.inputs.environment == 'canary' }}
     steps:
       - name: Run Only Canary Command
         run: echo "Hello Only Canary!"
