@@ -1,0 +1,65 @@
+image: node:18-alpine
+
+stages:
+  - install
+  - test
+  - build
+  - release
+  - deploy
+
+variables:
+  NODE_ENV: production
+
+cache:
+  paths:
+    - node_modules/
+
+install_dependencies:
+  stage: install
+  script:
+    - echo "Installing dependencies..."
+    - npm ci
+  artifacts:
+    paths:
+      - node_modules/
+    expire_in: 1 day
+
+run_tests:
+  stage: test
+  script:
+    - echo "Running tests..."
+    - npm test
+
+build_project:
+  stage: build
+  script:
+    - echo "Building the project..."
+    - npm run build
+  artifacts:
+    paths:
+      - .next/
+      - public/
+      - package.json
+      - yarn.lock
+    expire_in: 1 week
+
+create_release:
+  stage: release
+  script:
+    - echo "Creating release package..."
+    - mkdir release
+    - cp -r .next public package.json yarn.lock release/
+    - tar -czvf release.tar.gz release
+  artifacts:
+    paths:
+      - release.tar.gz
+    expire_in: 1 week
+
+deploy_to_vercel:
+  stage: deploy
+  only:
+    - main
+  script:
+    - echo "Deploying to Vercel..."
+    - npm install -g vercel
+    - vercel --token $VERCEL_TOKEN --prod
