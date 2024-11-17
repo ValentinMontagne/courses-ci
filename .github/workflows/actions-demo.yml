@@ -81,8 +81,16 @@ jobs:
   e2e-test:
     runs-on: ubuntu-latest
     needs: build 
-    if: github.event_name == 'pull_request'  # Rendre visible uniquement pour les PR
+    if: github.event_name == 'pull_request' 
     steps:
       - name: Run E2E Tests
         run: echo "Hello E2E!"
- 
+  only-canary:
+    runs-on: ubuntu-latest
+    eeds: build 
+    if: env.ENV_TARGET == 'canary' 
+    env: 
+     ENV_TARGET: canary 
+    steps:
+      - name: Run Only Canary Command
+        run: echo "Hello Only Canary!"
