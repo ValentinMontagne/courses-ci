@@ -5,7 +5,7 @@ on:
     branches: ['main']
   pull_request:
     branches: ['main']
-
+  
 jobs:
   # Job de build
   build:
@@ -84,4 +84,11 @@ jobs:
     steps:
       - name: Run E2E Tests
         run: echo "Hello E2E!"
-
+  only-canary:
+    runs-on: ubuntu-latest
+    if: env.ENV_TARGET == 'canary' 
+    env: 
+     ENV_TARGET: canary 
+    steps:
+      - name: Run Only Canary Command
+        run: echo "Hello Only Canary!"
