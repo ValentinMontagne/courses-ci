@@ -86,4 +86,4 @@ jobs:
 
       - name: Create release
         run: |
-          npx --yes release-it --ci --no-npm
+          npx --yes release-it --ci
