@@ -14,8 +14,8 @@
   "scripts": {
     "test": "echo \"No tests specified\"",
     "lint": "eslint ",
-    "build": "mkdir -p dist",
-    "prepare": "husky"
+    "build": "mkdir -p dist",	
+    "prepare": "husky" 
   },
   "keywords": [],
   "author": "",

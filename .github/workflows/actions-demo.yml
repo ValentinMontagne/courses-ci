@@ -27,3 +27,8 @@ jobs:
         with:
           name: web
           path: ./dist
+  	
+  unit-test:
+    stage: test
+    script:
+      - npm test
