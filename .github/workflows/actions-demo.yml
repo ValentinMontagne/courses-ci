@@ -89,7 +89,8 @@ jobs:
         run: echo "Hello E2E!"
   only-canary:
     runs-on: ubuntu-latest
-    if: ENV_TARGET == 'canary'
+    needs: build
+    if: evn.ENV_TARGET == 'canary'
     steps:
       - name: Run Only Canary Command
         run: echo "Hello Only Canary!"
