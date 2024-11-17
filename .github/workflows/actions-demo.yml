@@ -29,9 +29,10 @@ jobs:
         git remote set-url origin "https://github.com/${{ github.repository }}.git"
 
   # Job de build
-build:
+  build:
     runs-on: ubuntu-latest
     steps:
+      # Utilisation de l'anchor pour éviter la duplication
       <<: *shared-steps
       - name: Validate code
         run: npm run lint
@@ -44,43 +45,49 @@ build:
           name: web
           path: ./dist
 
-unit-test:
+  unit-test:
     runs-on: ubuntu-latest
     needs: build
     steps:
+      # Utilisation de l'anchor pour éviter la duplication
       <<: *shared-steps
       - name: Run Tests
         run: npm test
 
-integration-test:
+  integration-test:
     runs-on: ubuntu-latest
     needs: unit-test
     steps:
+      # Utilisation de l'anchor pour éviter la duplication
       <<: *shared-steps
       - name: Run Integration Test
         run: echo "Hello Integration !"
 
-e2e-test:
+  e2e-test:
     runs-on: ubuntu-latest
     needs: integration-test
+    if: github.event_name == 'pull_request'
     steps:
+      # Utilisation de l'anchor pour éviter la duplication
       <<: *shared-steps
       - name: Run E2E Tests
         run: echo "Hello E2E!"
 
-release:
+  release:
     runs-on: ubuntu-latest
     needs: build
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     env:
       GITHUB_TOKEN: ${{ secrets.HUB_TOKEN }}
     steps:
+      # Utilisation de l'anchor pour éviter la duplication
       <<: *shared-steps
 
-only-canary:
+  only-canary:
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.environment == 'canary' }}
     steps:
+      # Utilisation de l'anchor pour éviter la duplication
       <<: *shared-steps
       - name: Run Only Canary Command
         run: echo "Hello Only Canary!"
