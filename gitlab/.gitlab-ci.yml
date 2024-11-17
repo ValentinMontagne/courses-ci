@@ -1,0 +1,86 @@
+# .gitlab-ci.yml file
+
+image: node:latest
+cache:
+  key:
+    files:
+      - package-lock.json
+  paths:
+    - node_modules/
+    - .npm/
+
+stages:
+  - validate
+  - test
+  - build
+  - release
+  - deploy
+
+
+variables:
+  ENV_TARGET: "canary"
+
+.default_test_stage: &default_test_stage
+  <<: *default_test_stage
+  stage: test
+
+
+install:
+  stage: .pre
+  script:
+    # define cache dir & use it npm!
+    - npm ci --cache .npm --prefer-offline
+
+lint:
+  stage: validate
+  script:
+    - npm run lint
+  rules:
+    - if: '$CI_COMMIT_TAG == null
+        && $CI_COMMIT_TITLE !~ /^chore: release/'
+
+only_canary:
+  stage: validate
+  script: 
+    - echo "Welcome back Only Canary ! I had lost you my friend"
+
+unit-test:
+  <<: *default_test_stage
+  script:
+    - npm test
+  rules:
+    - if: '$CI_COMMIT_TAG == null
+        && $CI_COMMIT_TITLE !~ /^chore: release/'   
+
+integration-test:
+  stage: test
+  script:
+    - echo "Welcome back too Integration, where have you been ??"
+  needs:
+    - job: unit-test
+
+E2E_test:
+  <<: *default_test_stage
+  script: 
+    - echo "HEllo E2E !"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" 
+  needs: 
+    - job: integration-test
+
+release:
+  stage: release
+  when: manual
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"
+        && $CI_COMMIT_TAG == null
+        && $CI_COMMIT_TITLE !~ /^chore: release/'
+  before_script:
+    - git config user.email $GITLAB_USER_EMAIL
+    - git config user.name $GITLAB_USER_NAME
+    - git remote set-url origin
+      "https://gitlab-ci-token:$GITLAB_TOKEN@$CI_SERVER_HOST/$CI_PROJECT_PATH.git"
+    - git checkout $CI_COMMIT_BRANCH
+    - git pull origin $CI_COMMIT_BRANCH --rebase
+  script:
+    - npx --yes release-it --ci
