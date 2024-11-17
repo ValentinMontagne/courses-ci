@@ -1,0 +1,84 @@
+# .gitlab-ci.yml file
+
+image: node:latest
+cache:
+  key:
+    files:
+      - package-lock.json
+  paths:
+    - node_modules/
+    - .npm/
+
+stages:
+  - validate
+  - test
+  - build
+  - release
+  - deploy
+
+variables:
+  ENV_TARGET: "canary"
+
+.hide-push: &hide-push
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+      when: never
+      allow_failure: true
+
+install:
+  stage: .pre
+  script:
+    # define cache dir & use it npm!
+    - npm ci --cache .npm --prefer-offline
+
+only-canary:
+  stage: validate
+  script: echo "Hello only 'ENV_TARGET'"
+
+lint:
+  <<: *hide-push
+  stage: validate
+  script:
+    - npm run lint
+
+unit-test:
+  <<: *hide-push
+  stage: test
+  script:
+    - npm test
+
+integration-test:
+  stage: test
+  script: echo "Hello Integration !"
+  rules:
+    - needs:
+        - job: unit-test
+  # Ici integration-test ne se lance bien qu'une fois unit-test terminé, cependant ce dernier a été bloqué durant l'ex 1.
+  # Pour constater son fonctionnement, il suffit de placer le *hide-push d'unit-test en commentaire, cette dernière étant gardé 
+  # pour conserver la validité de l'ex 1.
+
+E2E-test:
+  stage: test
+  script: echo "Hello E2E !"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: always
+    - needs:
+        - job: integration-test
+      
+release:
+  stage: release
+  when: manual
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"
+        && $CI_COMMIT_TAG == null
+        && $CI_COMMIT_TITLE !~ /^chore: release/'
+  before_script:
+    - git config user.email $GITLAB_USER_EMAIL
+    - git config user.name $GITLAB_USER_NAME
+    - git remote set-url origin
+      "https://gitlab-ci-token:$GITLAB_TOKEN@$CI_SERVER_HOST/$CI_PROJECT_PATH.git"
+    - git checkout $CI_COMMIT_BRANCH
+    - git pull origin $CI_COMMIT_BRANCH --rebase
+  script:
+    - npx --yes release-it --ci
