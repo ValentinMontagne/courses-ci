@@ -1,0 +1,108 @@
+name: Node.js CI Pipeline
+
+on:
+    push:
+      branches:
+        - main
+    pull_request:
+      branches:
+        - main 
+jobs:
+    # Étape 1 : Validation (validate)
+    validate:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout repository
+          uses: actions/checkout@v2
+  
+        - name: Install dependencies
+          run: npm ci
+  
+        - name: Lint the code
+          run: npm run lint
+  
+    # Étape 2 : Tests (test)
+    test:
+      runs-on: ubuntu-latest
+      needs: validate
+      steps:
+        - name: Checkout repository
+          uses: actions/checkout@v2
+  
+        - name: Set up Node.js
+          uses: actions/setup-node@v2
+          with:
+            node-version: '16'
+  
+        - name: Install dependencies
+          run: npm ci
+  
+        - name: Run tests
+          run: npm test
+  
+    # Étape 3 : Build (build)
+    build:
+      runs-on: ubuntu-latest
+      needs: test
+      steps:
+        - name: Checkout repository
+          uses: actions/checkout@v2
+  
+        - name: Set up Node.js
+          uses: actions/setup-node@v2
+          with:
+            node-version: '16'
+  
+        - name: Install dependencies
+          run: npm ci
+  
+        - name: Build the application
+          run: npm run build
+  
+        - name: Verify dist directory
+          run: |
+            if [ -d "dist" ]; then
+              echo "dist directory exists."
+              ls dist  # Affiche le contenu de dist
+            else
+              echo "dist directory does not exist!"
+              exit 1  # Arrête le pipeline si dist n'existe pas
+            fi
+  
+    # Étape 4 : Release (release)
+    release:
+      runs-on: ubuntu-latest
+      needs: build
+      steps:
+        - name: Checkout repository
+          uses: actions/checkout@v2
+  
+        - name: Check if dist exists and list files
+          run: |
+            if [ ! -d "dist" ]; then
+              echo "Directory dist does not exist, skipping release step."
+              exit 0  # Sortir proprement si dist n'existe pas
+            else
+              echo "Directory dist exists. Listing files:"
+              ls -R dist  # Affiche le contenu de dist
+            fi
+  
+        - name: Create release artifact
+          run: |
+            mkdir release
+            cp -r dist/* release/
+  
+        - name: Upload release artifact
+          uses: actions/upload-artifact@v3
+          with:
+            name: release-files
+            path: release/
+  
+    # Étape 5 : Deployment (deploy)
+    deploy:
+      runs-on: ubuntu-latest
+      needs: release
+      steps:
+        - name: Deploy application
+          run: echo "Deployment step goes here (e.g., uploading files to a server)"
+  
