@@ -110,16 +110,12 @@ jobs:
             ls -R dist
           fi
 
-      - name: Create release artifact
-        run: |
-          mkdir -p release
-          cp -r dist/* release/
-
       - name: Upload release artifact
         uses: actions/upload-artifact@v3
         with:
           name: release-files
-          path: release/
+          path: dist/
+
 
   # Étape 5 : Deployment (deploy)
   deploy:
