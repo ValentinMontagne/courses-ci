@@ -35,9 +35,9 @@ jobs:
         run: npm run lint
 
   # Étape 2 : Tests (test)
+
   test:
     runs-on: ubuntu-latest
-    needs: validate
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -48,14 +48,9 @@ jobs:
           node-version: '20.17.0'
 
       - name: Install dependencies
-        run: |
-          if [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm install
-          fi
+        run: npm ci
 
-      - name: Run tests
+      - name: Run tests with Vitest
         run: npm test
 
   # Étape 3 : Build (build)
