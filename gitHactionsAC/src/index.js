@@ -12,6 +12,7 @@ app.get('/auth/:secret', (req, res) => {
   const { secret } = req.params;
   const response = auth(secret);
 
+  console.log(secret);
   res.status(response.status).send(response.message);
 });
 
