@@ -4,9 +4,11 @@ on:
     push:
       branches:
         - main
+        - develop-ci
     pull_request:
       branches:
         - main 
+        - develop-ci
 jobs:
     # Étape 1 : Validation (validate)
     validate:
